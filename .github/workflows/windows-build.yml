@@ -1,35 +1,62 @@
-name: Build Windows Executable
+name: Build Game Executables
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:   # allows manual trigger from GitHub UI
+    tags:
+      - "v*"  # Trigger on version tags like v1.0
 
 jobs:
   build:
-    runs-on: windows-latest
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]  # Multiple platforms
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller
-        if exist requirements.txt pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
 
-    - name: Build executable
-      run: |
-        pyinstaller --onefile --windowed --name SpeedyDot main.py
+      - name: Build executable for ${{ matrix.os }}
+        run: |
+          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+            # Windows-specific build
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets" --icon=icon.ico
+          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            # macOS-specific build
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets" --icon=icon.icns
+          elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+            # Linux-specific build
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets"
+          fi
 
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: SpeedyDot-exe
-        path: dist/SpeedyDot.exe
+      - name: Upload Windows Executable Artifact
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: SpeedyDot-Windows
+          path: dist/SpeedyDot.exe
+
+      - name: Upload macOS Executable Artifact
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: SpeedyDot-macOS
+          path: dist/SpeedyDot.app
+
+      - name: Upload Linux Executable Artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v3
+        with:
+          name: SpeedyDot-Linux
+          path: dist/SpeedyDot
