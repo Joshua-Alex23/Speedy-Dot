@@ -29,13 +29,13 @@ jobs:
 
       - name: Build executable for ${{ matrix.os }}
         run: |
-          if [ "${{ matrix.os }}" == "windows-latest" ]; then
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             # Windows-specific build
-            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets" --icon=icon.ico
-          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets;assets" --icon=icon.ico
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             # macOS-specific build
             pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets" --icon=icon.icns
-          elif [ "${{ matrix.os }}" == "ubuntu-latest" ]; then
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             # Linux-specific build
             pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets"
           fi
