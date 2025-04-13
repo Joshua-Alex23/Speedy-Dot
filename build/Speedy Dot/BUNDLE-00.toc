@@ -1,0 +1,3 @@
+([('Speedy Dot',
+   '/Users/mantispequod/Documents/Josh Codes/Dot Game/dist/Speedy Dot',
+   'EXECUTABLE')],)
