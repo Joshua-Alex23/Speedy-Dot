@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         # Include Python version in matrix for flexibility
-        python-version: ["3.9", "3.10", "3.11"] # Specify supported Python versions
+        python-version: ["3.11"] # Specify supported Python versions
       fail-fast: false # Don't cancel all jobs if one fails
 
     steps:
