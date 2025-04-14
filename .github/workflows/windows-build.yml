@@ -12,15 +12,21 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        # Include Python version in matrix for flexibility
+        python-version: ["3.9", "3.10", "3.11"] # Specify supported Python versions
+      fail-fast: false # Don't cancel all jobs if one fails
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Needed for proper tagging
 
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
+          cache: "pip" # Enable caching for faster dependencies installation
 
       - name: Install dependencies
         run: |
@@ -29,33 +35,28 @@ jobs:
           pip install pyinstaller
 
       - name: Build executable for ${{ matrix.os }}
-        shell: bash
+        shell: bash # Ensure consistent shell
         run: |
+          echo "Building for ${{ matrix.os }} with Python ${{ matrix.python-version }}" # Debugging
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets;assets" --icon=icon.ico
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            # macOS:  Use a .icns icon.  Also, ensure assets are correctly bundled.
             pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets" --icon=icon.icns
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets"
           fi
 
-      - name: Upload Windows Executable
-        if: matrix.os == 'windows-latest'
-        uses: ./.github/actions/upload-artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: SpeedyDot-Windows
-          path: dist/SpeedyDot.exe
+          name: SpeedyDot-${{ matrix.os }}-${{ matrix.python-version }} # Include OS and Python version
+          path: dist/
 
-      - name: Upload macOS Executable
-        if: matrix.os == 'macos-latest'
-        uses: ./.github/actions/upload-artifact
-        with:
-          name: SpeedyDot-macOS
-          path: dist/SpeedyDot.app
-
-      - name: Upload Linux Executable
-        if: matrix.os == 'ubuntu-latest'
-        uses: ./.github/actions/upload-artifact
-        with:
-          name: SpeedyDot-Linux
-          path: dist/SpeedyDot
+      - name: Display file structure
+        if: ${{ matrix.os == 'ubuntu-latest' }} # For debugging
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Contents of dist:"
+          ls -l dist/
