@@ -18,36 +18,47 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3 # Consider updating to v4 if issues persist
+        uses: actions/checkout@v4 # Updated checkout action version
         with:
           fetch-depth: 0 # Needed for proper tagging
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4 # Consider updating to v5 if issues persist
+        uses: actions/setup-python@v5 # Updated setup-python action version
         with:
           python-version: ${{ matrix.python-version }}
           cache: "pip" # Enable caching for faster dependencies installation
 
-      - name: Install dependencies
+      # --- Added Step for Ubuntu Dependencies ---
+      - name: Install Pygame system dependencies (Ubuntu only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libfreetype6-dev
+        # These are common libraries needed by Pygame modules. Add others if your game uses more specific features.
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           # Ensure requirements.txt exists and lists pygame and other dependencies
           pip install -r requirements.txt
           pip install pyinstaller
+        # Check the logs here if this step fails. Ensure requirements.txt is correct.
 
       - name: Build executable for ${{ matrix.os }}
         shell: bash # Ensure consistent shell
         run: |
           echo "Building for ${{ matrix.os }} with Python ${{ matrix.python-version }}" # Debugging
-          # Ensure main.py, assets folder, and icon files are in the correct location
+          # Ensure main.py and icon files are in the correct location relative to the repo root
+          # Check logs here if PyInstaller fails. Common issues: missing files, code errors, hidden imports.
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets;assets" --icon=icon.ico
+            # Removed --add-data flag as there's no assets folder
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --icon=icon.ico
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            # macOS: Use a .icns icon. Ensure assets are correctly bundled.
-            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets" --icon=icon.icns
+            # Removed --add-data flag as there's no assets folder
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --icon=icon.icns
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            # Linux: No specific icon format needed by default, but ensure assets path is correct.
-            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --add-data "assets:assets"
+            # Removed --add-data flag as there's no assets folder
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole
           fi
 
       - name: Upload Artifact
@@ -57,6 +68,7 @@ jobs:
           name: SpeedyDot-${{ matrix.os }}-${{ matrix.python-version }} # Include OS and Python version
           # Upload the entire dist directory which contains the executable/bundle
           path: dist/
+          if-no-files-found: error # Fail the step if dist/ is empty or doesn't exist
 
       - name: Display file structure (for debugging)
         # This step helps verify the build output before uploading
