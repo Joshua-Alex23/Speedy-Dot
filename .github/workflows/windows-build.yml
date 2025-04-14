@@ -52,10 +52,10 @@ jobs:
           # Check logs here if PyInstaller fails. Common issues: missing files, code errors, hidden imports.
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             # Removed --add-data flag as there's no assets folder
-            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --icon=icon.ico
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --icon=game.ico
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             # Removed --add-data flag as there's no assets folder
-            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --icon=icon.icns
+            pyinstaller main.py --name "SpeedyDot" --onefile --noconsole --icon=game.icns
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
             # Removed --add-data flag as there's no assets folder
             pyinstaller main.py --name "SpeedyDot" --onefile --noconsole
