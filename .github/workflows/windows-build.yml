@@ -71,10 +71,9 @@ jobs:
           if-no-files-found: error # Fail the step if dist/ is empty or doesn't exist
 
       - name: Display file structure (for debugging)
-        # This step helps verify the build output before uploading
-        if: success() # Run only if previous steps succeed
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Contents of dist/ directory:"
-          ls -lR dist/
+            echo "Current directory:"
+            pwd
+            echo "Contents of dist/ directory:"
+            find dist
+        shell: bash
