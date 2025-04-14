@@ -3,7 +3,7 @@ name: Build Game Executables
 on:
   push:
     tags:
-      - "v*"  # Trigger when pushing version tags like v1.0
+      - "v*"
 
 jobs:
   build:
@@ -41,21 +41,21 @@ jobs:
 
       - name: Upload Windows Executable
         if: matrix.os == 'windows-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@8e8f7c7b35e25513d3bcd1a119e2f42cba6e53ea
         with:
           name: SpeedyDot-Windows
           path: dist/SpeedyDot.exe
 
       - name: Upload macOS Executable
         if: matrix.os == 'macos-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@8e8f7c7b35e25513d3bcd1a119e2f42cba6e53ea
         with:
           name: SpeedyDot-macOS
           path: dist/SpeedyDot.app
 
       - name: Upload Linux Executable
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@8e8f7c7b35e25513d3bcd1a119e2f42cba6e53ea
         with:
           name: SpeedyDot-Linux
           path: dist/SpeedyDot
